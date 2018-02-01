@@ -54,7 +54,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4697852628786344}
   - component: {fileID: 95981238988259906}
-  m_Layer: 0
+  - component: {fileID: 65975648849564298}
+  - component: {fileID: 208642879379878934}
+  m_Layer: 10
   m_Name: Column
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -256,6 +258,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1827026557820390}
   m_Mesh: {fileID: 4300002, guid: 7efbd8df4f8f248a58d8a33c88abe034, type: 3}
+--- !u!65 &65975648849564298
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1537587628110714}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.07, y: 4.27, z: 2}
+  m_Center: {x: 0, y: 2.7, z: 0}
 --- !u!95 &95981238988259906
 Animator:
   serializedVersion: 3
@@ -273,3 +287,18 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!208 &208642879379878934
+NavMeshObstacle:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1537587628110714}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.035, y: 2.135, z: 1}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 2.3, z: 0}
+  m_TimeToStationary: 0.5
