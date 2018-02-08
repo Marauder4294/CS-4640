@@ -13,16 +13,50 @@ public class GameManager : MonoBehaviour {
     public float minSpawnTime;
     public float maxSpawnTime;
     public int aliensPerSpawn;
+    public GameObject upgradePrefab;
+    public Gun gun;
+    public float upgradeMaxTimeSpawn = 7.5f;
 
     private int aliensOnScreen = 0;
     private float generatedSpawnTime = 0;
     private float currentSpawnTime = 0;
+    private bool spawnedUpgrade = false;
+    private float actualUpgradeTime = 0;
+    private float currentUpgradeTime = 0;
+    public GameObject deathFloor;
+    public Animator arenaAnimator;
     void Start () {
-		
+        actualUpgradeTime = Random.Range(upgradeMaxTimeSpawn - 3.0f, upgradeMaxTimeSpawn);
+        actualUpgradeTime = Mathf.Abs(actualUpgradeTime);
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (player == null)
+        {
+            return;
+        }
+
+        currentUpgradeTime += Time.deltaTime;
+
+        if (currentUpgradeTime > actualUpgradeTime)
+        {
+            if (!spawnedUpgrade)
+            {
+                int randomNumber = Random.Range(0, spawnPoints.Length - 1);
+                GameObject spawnLocation = spawnPoints[randomNumber];
+
+                GameObject upgrade = Instantiate(upgradePrefab) as GameObject;
+                Upgrade upgradeScript = upgrade.GetComponent<Upgrade>();
+                upgradeScript.gun = gun;
+                upgrade.transform.position = spawnLocation.transform.position;
+
+                spawnedUpgrade = true;
+                SoundManager.Instance.PlayOneShot(SoundManager.Instance.powerUpAppear);
+            }
+        }
+
         currentSpawnTime += Time.deltaTime;
         if (currentSpawnTime > generatedSpawnTime)
         {
@@ -60,11 +94,29 @@ public class GameManager : MonoBehaviour {
 
                     Alien alienScript = newAlien.GetComponent<Alien>();
                     alienScript.target = player.transform;
+                    alienScript.OnDestroy.AddListener(AlienDestroyed);
+                    alienScript.GetDeathParticles().SetDeathFloor(deathFloor);
                     Vector3 targetRotation = new Vector3(player.transform.position.x,
                         newAlien.transform.position.y, player.transform.position.z);
                     newAlien.transform.LookAt(targetRotation);
                 }
             }
         }
+    }
+
+    public void AlienDestroyed()
+    {
+        aliensOnScreen -= 1;
+        totalAliens -= 1;
+        if (totalAliens == 0)
+        {
+            Invoke("endGame", 2.0f);
+        }
+    }
+
+    private void endGame()
+    {
+        SoundManager.Instance.PlayOneShot(SoundManager.Instance.elevatorArrived);
+        arenaAnimator.SetTrigger("PlayWon");
     }
 }

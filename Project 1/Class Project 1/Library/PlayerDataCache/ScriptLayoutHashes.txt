@@ -14,8 +14,8 @@ ff05dcdf90651c3d98a9cad3df5e471e UnityEngine.Timeline.dll:UnityEngine.Timeline.C
 6af7378a45ad6da4992a71ef50ddc2eb UnityEngine.Timeline.dll:UnityEngine.Timeline.GroupTrack
 6af7378a45ad6da4992a71ef50ddc2eb UnityEngine.Timeline.dll:UnityEngine.Timeline.PlayableTrack
 9ca6347af5ceb6b0d1c105af31b6722e UnityEngine.Timeline.dll:UnityEngine.Timeline.TimelineAsset
-5fcd5fc8c1dfadbc6dd11a45b6accf60 Assembly-CSharp.dll:.GameManager
-8b2ba7545180ce267ce7e15f7bb32714 Assembly-CSharp.dll:.Gun
+3fea52f6fc10575ba2ff8eb71652c01d Assembly-CSharp.dll:.GameManager
+954d31627580989135ef927e1967c064 Assembly-CSharp.dll:.Gun
 a35dc9cca2faebc5f5f1aeb9e8e47bbe UnityEngine.UI.dll:UnityEngine.UI.AspectRatioFitter
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.UI.dll:UnityEngine.EventSystems.BaseInput
 49cd62a578efc0a599b810a2b66cd49c UnityEngine.UI.dll:UnityEngine.UI.Button
@@ -131,7 +131,7 @@ e9bdabf9265d758d56f01bb188916fa8 UnityEngine.Networking.dll:UnityEngine.Networki
 3f32f08a64daf40b09ed864d96fe3840 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransform
 73843688b51256aed059f049c540bca8 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformChild
 528ea1fd7c01796fc60c4e2f172ea229 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformVisualizer
-4f0b7495b9fd30557129d2ea2b0541ff Assembly-CSharp.dll:.PlayerController
+1cbc9c902c2bff854615dbc5f966d38f Assembly-CSharp.dll:.PlayerController
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.TestRunner.dll:UnityEngine.TestTools.TestRunner.Callbacks.PlayModeRunnerCallback
 96d0fbde9fd209878a0a291f82c9bcdd UnityEngine.TestRunner.dll:UnityEngine.TestTools.TestRunner.PlaymodeTestsController
 64eb32cc721b1cc68a91ed57461e188c UnityEngine.TestRunner.dll:UnityEngine.TestTools.TestRunner.Callbacks.RemoteTestResultSender
@@ -146,4 +146,10 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Bullet
 74bdfe3150293437bfa63a797afb4793 Assembly-CSharp.dll:.CameraMovement
 4df4a65090aff422c66d8d1fcef28daf Assembly-CSharp.dll:.Rotator
-8dc8f5f3cd05b4547ebf34600693e233 Assembly-CSharp.dll:.Alien
+f0a7f410fceb1ba3f3bcd53a5e7c34af Assembly-CSharp.dll:.Alien
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ArenaWall
+aba8ca3365ecc8917bbbda33bef75f31 Assembly-CSharp.dll:.SoundManager
+12fa7950d82905b7a9ed8673837b4352 Assembly-CSharp.dll:.Upgrade
+6f1934ce610b0a57669eaf2a53f697b3 Assembly-CSharp.dll:.SelfDestruct
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.DeathParticles
+ab05f725150bcaac4e52f3c3f17a4063 Assembly-CSharp.dll:.Arena

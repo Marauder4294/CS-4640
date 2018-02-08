@@ -27,6 +27,7 @@ GameObject:
   - component: {fileID: 474840}
   - component: {fileID: 11458982}
   - component: {fileID: 13615294}
+  - component: {fileID: 114259150164582552}
   m_Layer: 15
   m_Name: Pickup
   m_TagString: Untagged
@@ -1565,3 +1566,15 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 105092}
   m_IsPrefabParent: 1
+--- !u!114 &114259150164582552
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 105092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aed4673e98e9c349a898b50bf04ef77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gun: {fileID: 0}

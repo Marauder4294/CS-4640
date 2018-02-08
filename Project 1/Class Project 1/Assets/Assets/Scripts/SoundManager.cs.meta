@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 6d219108536be99438fd3e5fba79fc3c
+timeCreated: 1518070600
+licenseType: Free
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - gunFire: {fileID: 8300000, guid: 5601eca1dfa29004bb6fa92fb60c7feb, type: 3}
+  - upgradedGunFire: {fileID: 8300000, guid: 8e48e9181723f0c4c9c881d2bfc0fa03, type: 3}
+  - hurt: {fileID: 8300000, guid: a16b9017a7a3b744fbd8ab26d0a816c3, type: 3}
+  - alienDeath: {fileID: 8300000, guid: 8f252cb39a2a2da44aefd3d09599af53, type: 3}
+  - marineDeath: {fileID: 8300000, guid: d9f613ad6fc2e5648b734dade33baf01, type: 3}
+  - victory: {fileID: 8300000, guid: b4d3cb20c25bae54e999c556d56876b8, type: 3}
+  - elevatorArrived: {fileID: 8300000, guid: 2f387366f0fba044487680bf853f5f68, type: 3}
+  - powerUpPickup: {fileID: 8300000, guid: 55bc10006917fbe46a89f70a93cd4e1f, type: 3}
+  - powerUpAppear: {fileID: 8300000, guid: 00f25f135ee488c4591479876ca3f10c, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
