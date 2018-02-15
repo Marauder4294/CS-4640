@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ca343d130a76e554788f3b21fb443903
+timeCreated: 1518579440
+licenseType: Free
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - hazard: {instanceID: 0}
+  - scoreText: {instanceID: 0}
+  - restartText: {instanceID: 0}
+  - gameOverText: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
