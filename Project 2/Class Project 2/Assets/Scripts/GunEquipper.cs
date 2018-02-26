@@ -14,6 +14,9 @@ public class GunEquipper : MonoBehaviour
 
     private GameObject activeGun;
 
+    private float zoomFOV;
+    private float zoomSpeed = 6;
+
     [SerializeField]
     GameUI gameUI;
 
