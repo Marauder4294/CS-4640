@@ -19,6 +19,9 @@ public class Gun : MonoBehaviour
     private float zoomFOV;
     private float zoomSpeed = 6;
 
+    public AudioClip deathSound;
+    public AudioClip weakHitSound;
+
     void Start()
     {
         zoomFOV = Constants.CameraDefaultZoom / zoomFactor;
@@ -72,12 +75,25 @@ public class Gun : MonoBehaviour
 
     private void processHit(GameObject hitObject)
     {
-        if (hitObject.GetComponent<Player>() != null)
+        if (hitObject.tag == "Bullseye")
+        {
+            GameObject[] robots = GameObject.FindGameObjectsWithTag("Robot");
+
+            for (int i = 0; i <= robots.Length - 1; i++)
+            {
+                if (robots[i].tag == "Robot")
+                {
+                    Destroy(robots[i].gameObject);
+                    GetComponent<AudioSource>().PlayOneShot(weakHitSound);
+                    GetComponent<AudioSource>().PlayOneShot(deathSound);
+                }
+            }
+        }
+        else if (hitObject.GetComponent<Player>() != null)
         {
             hitObject.GetComponent<Player>().TakeDamage(damage);
         }
-
-        if (hitObject.GetComponent<Robot>() != null)
+        else if (hitObject.GetComponent<Robot>() != null)
         {
             hitObject.GetComponent<Robot>().TakeDamage(damage);
         }
