@@ -53,7 +53,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b3b024660fea0b4e80b21b8352efb67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cursor: {fileID: 0}
+  cursor: {fileID: 1894085372211642}
+  uiCursor: {fileID: 0}
 --- !u!135 &135502041598649060
 SphereCollider:
   m_ObjectHideFlags: 1

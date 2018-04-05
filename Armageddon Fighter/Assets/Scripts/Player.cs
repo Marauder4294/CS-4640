@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
 using System.IO;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -10,11 +11,14 @@ public class Player : MonoBehaviour
     GameObject enemy;
 
     GameObject cursor;
+    RawImage uiCursor;
 
     bool isMoving;
     bool lockXmovement;
     bool lockZmovement;
     float moveSpeed;
+
+    bool isInUI;
 
     uint moveSpeedMultiplier;
     uint attackSpeed;
@@ -75,28 +79,49 @@ public class Player : MonoBehaviour
         lockZmovement = false;
 
         cursor = GameObject.FindGameObjectWithTag("Cursor");
+
+        uiCursor = GameObject.FindGameObjectWithTag("UI Cursor").GetComponent<RawImage>();
+
+        isInUI = false;
     }
 
     void FixedUpdate()
     {
+        if (uiCursor.enabled == true && isInUI == false)
+        {
+            isInUI = true;
+        }
+        else if (uiCursor.enabled == false && isInUI == true)
+        {
+            isInUI = false;
+        }
+
         if (Input.GetMouseButton(0))
         {
-            if (isEngaged == true)
+            if (isInUI == false)
             {
-                hero.transform.LookAt(enemy.transform.position);
-                hero.GetComponent<Animation>().Play(attack.name);
-                Animation animation = hero.GetComponent<Animation>();
-                animation[attack.name].speed = 1 + (0.01f * attackSpeed);
-                animation.Play(attack.name);
+                if (isEngaged == true)
+                {
+                    hero.transform.LookAt(enemy.transform.position);
+                    hero.GetComponent<Animation>().Play(attack.name);
+                    Animation animation = hero.GetComponent<Animation>();
+                    animation[attack.name].speed = 1 + (0.01f * attackSpeed);
+                    animation.Play(attack.name);
+                }
+                else
+                {
+                    isMoving = true;
+
+                    moveToPosition = new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z);
+
+                    hero.transform.LookAt(moveToPosition);
+                }
             }
             else
             {
-                isMoving = true;
 
-                moveToPosition = new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z);
-
-                hero.transform.LookAt(moveToPosition);
             }
+
         }
         else if (Input.GetMouseButton(1))
         {

@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class Cursor : MonoBehaviour {
 
     public GameObject cursor;
+    public GameObject uiCursor;
 
     Color originalColor;
     Color enemyHighlightColor;
@@ -14,8 +15,8 @@ public class Cursor : MonoBehaviour {
     Vector3 zeroedScreenVector;
     Vector3 screenMaxSizeVector;
 
-    Image[] uiImages;
-    Text[] uiText;
+    //Image[] uiImages;
+    //Text[] uiText;
 
     float uiBarHeight;
 
@@ -24,8 +25,13 @@ public class Cursor : MonoBehaviour {
 
     bool isUICursor;
 
+    Image enemyNameBar;
+    Image enemyHealthBar;
+    Text enemyNameText;
+
     // Use this for initialization
     void Start () {
+
         UnityEngine.Cursor.visible = false;
         UnityEngine.Cursor.lockState = UnityEngine.CursorLockMode.Locked;
 
@@ -38,37 +44,94 @@ public class Cursor : MonoBehaviour {
         zeroedScreenVector = new Vector3(xLimit, yLimit, 0);
         screenMaxSizeVector = new Vector3(Screen.width - xLimit, Screen.height - yLimit, 19);
 
-        uiImages = FindObjectsOfType<Image>();
-        uiText = FindObjectsOfType<Text>();
+        Image[] uiImages = FindObjectsOfType<Image>();
+        Text[]  uiText = FindObjectsOfType<Text>();
 
-        uiBarHeight = uiImages[1].rectTransform.rect.height;
-
-        //if (SceneManager.GetActiveScene().name != "Main Menu")
-        //{
-        //    isUICursor = false;
+        if (SceneManager.GetActiveScene().name != "Main Menu")
+        {
+            isUICursor = false;
             
-        //    cursor[0].SetActive(true);
-        //    cursor[1].SetActive(false);
-        //}
-        //else
-        //{
-        //    isUICursor = true;
+            cursor.transform.position = new Vector3(0, 0.01f, 0);
+            uiCursor.GetComponent<RawImage>().rectTransform.sizeDelta = new Vector2(40, 40);
 
-        //    cursor[1].SetActive(true);
-        //    cursor[0].SetActive(false);
-        //}
+            for (int i = 0; i < uiImages.Length; i++)
+            {
+                if (uiImages[i].name == "EnemyNameBar")
+                {
+                    enemyNameBar = uiImages[i];
+                }
+                else if (uiImages[i].name == "EnemyHealthBar")
+                {
+                    enemyHealthBar = uiImages[i];
+                }
+                else if (uiImages[i].name == "UI Bar")
+                {
+                    uiBarHeight = uiImages[i].rectTransform.rect.height;
+                }
+            }
+            for (int i = 0; i < uiText.Length; i++)
+            {
+                if (uiText[i].name == "EnemyNameText")
+                {
+                    enemyNameText = uiText[i];
+                }
+            }
+        }
+        else
+        {
+            isUICursor = true;
+            uiBarHeight = Screen.height;
+
+            uiCursor.GetComponent<RawImage>().rectTransform.sizeDelta = new Vector2(100, 100);
+            cursor.transform.position = new Vector3(0, 100, 0);
+        }
+
+        uiCursor.GetComponent<RawImage>().enabled = isUICursor;
     }
 
     void FixedUpdate()
     {
-        cursorScreenPosition = Camera.main.WorldToScreenPoint(new Vector3(cursor.transform.position.x + Input.GetAxis("Mouse X"), 0.01f, cursor.transform.position.z + Input.GetAxis("Mouse Y")));
 
-        cursorPosition = Camera.main.ScreenToWorldPoint(new Vector3(Mathf.Clamp(cursorScreenPosition.x, zeroedScreenVector.x, screenMaxSizeVector.x),
-                Mathf.Clamp(cursorScreenPosition.y, zeroedScreenVector.y, screenMaxSizeVector.y),
-                Mathf.Clamp(cursorScreenPosition.z, zeroedScreenVector.z, screenMaxSizeVector.z)));
+        if (isUICursor == false)
+        {
+            cursorScreenPosition = Camera.main.WorldToScreenPoint(new Vector3(cursor.transform.position.x + Input.GetAxis("Mouse X"), 0.01f, cursor.transform.position.z + Input.GetAxis("Mouse Y")));
 
-        cursor.transform.position = new Vector3(cursorPosition.x, 0.01f, cursorPosition.z);
+            if (cursorScreenPosition.y > uiBarHeight)
+            {
+                cursorPosition = Camera.main.ScreenToWorldPoint(new Vector3(Mathf.Clamp(cursorScreenPosition.x, zeroedScreenVector.x, screenMaxSizeVector.x),
+                    Mathf.Clamp(cursorScreenPosition.y, zeroedScreenVector.y, screenMaxSizeVector.y),
+                    Mathf.Clamp(cursorScreenPosition.z, zeroedScreenVector.z, screenMaxSizeVector.z)));
 
+                cursor.transform.position = new Vector3(cursorPosition.x, 0.01f, cursorPosition.z);
+            }
+            else
+            {
+                isUICursor = true;
+                cursor.transform.position = new Vector3(cursorScreenPosition.x, 100 , cursorScreenPosition.z);
+                uiCursor.GetComponent<RawImage>().enabled = isUICursor;
+
+                uiCursor.transform.position = new Vector3(cursorScreenPosition.x - (40 * Input.GetAxis("Mouse X")), uiBarHeight - (40 * Input.GetAxis("Mouse Y")), 0);
+            }
+        }
+        else
+        {
+            if (uiCursor.transform.position.y <= uiBarHeight)
+            {
+                uiCursor.transform.position = new Vector3(Mathf.Clamp(uiCursor.transform.position.x - (40 * Input.GetAxis("Mouse X")), zeroedScreenVector.x, screenMaxSizeVector.x),
+                Mathf.Clamp(uiCursor.transform.position.y - (40 * Input.GetAxis("Mouse Y")), zeroedScreenVector.y, screenMaxSizeVector.y), 0);
+            }
+            else
+            {
+                isUICursor = false;
+                uiCursor.GetComponent<RawImage>().enabled = isUICursor;
+
+                cursorPosition = Camera.main.ScreenToWorldPoint(new Vector3(Mathf.Clamp(uiCursor.transform.position.x + Input.GetAxis("Mouse X"), zeroedScreenVector.x, screenMaxSizeVector.x),
+                    Mathf.Clamp(cursorScreenPosition.y, zeroedScreenVector.y, screenMaxSizeVector.y),
+                    Mathf.Clamp(cursorScreenPosition.z + Input.GetAxis("Mouse Y"), zeroedScreenVector.z, screenMaxSizeVector.z)));
+
+                cursor.transform.position = new Vector3(cursorPosition.x, 0.01f, cursorPosition.z);
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -77,12 +140,12 @@ public class Cursor : MonoBehaviour {
         {
             cursor.GetComponent<SpriteRenderer>().color = enemyHighlightColor;
 
-            uiImages[0].enabled = true;
+            enemyNameBar.enabled = true;
 
-            uiImages[2].enabled = true;
+            enemyHealthBar.enabled = true;
 
-            uiText[0].enabled = true;
-            uiText[0].text = other.gameObject.name;
+            enemyNameText.enabled = true;
+            enemyNameText.text = other.gameObject.name;
         }
         else if (other.gameObject.tag == "Pickup")
         {
@@ -96,12 +159,12 @@ public class Cursor : MonoBehaviour {
         {
             cursor.GetComponent<SpriteRenderer>().color = originalColor;
 
-            uiImages[0].enabled = false;
+            enemyNameBar.enabled = false;
 
-            uiImages[2].enabled = false;
+            enemyHealthBar.enabled = false;
 
-            uiText[0].enabled = false;
-            uiText[0].text = string.Empty;
+            enemyNameText.enabled = false;
+            enemyNameText.text = string.Empty;
         }
         else if (other.gameObject.tag == "Pickup")
         {
