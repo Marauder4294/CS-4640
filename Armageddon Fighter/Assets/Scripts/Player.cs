@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
-using System.IO;
+//using System.IO;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public GameObject hero;
-    GameObject enemy;
+    public Player hero;
 
     GameObject cursor;
     Color originalCursorColor;
@@ -22,12 +21,17 @@ public class Player : MonoBehaviour
 
     bool lockXmovement;
     bool lockZmovement;
+
     float moveSpeed;
+    uint life;
+    uint mana;
+    uint experience;
 
     bool isInUI;
 
     uint moveSpeedMultiplier;
     uint attackSpeed;
+    uint attackRating;
     uint strength;
     uint defense;
     uint health;
@@ -36,11 +40,12 @@ public class Player : MonoBehaviour
     Animation animation;
 
     public AnimationClip idle;
-    AnimationClip walk;
+    //AnimationClip walk;
     public AnimationClip run;
     public AnimationClip attack;
     public AnimationClip block;
-    AnimationClip die;
+    public AnimationClip die1;
+    public AnimationClip die2;
 
     Vector3 moveToPosition;
 
@@ -55,31 +60,39 @@ public class Player : MonoBehaviour
         {
             moveSpeedMultiplier = 40;
             attackSpeed = 30;
-            strength = 20;
+            attackRating = 40;
+            strength = 25;
             defense = 20;
             health = 20;
             magic = 20;
+            experience = 0;
         }
         else if (hero.name.Contains("Dasher"))
         {
             moveSpeedMultiplier = 80;
             attackSpeed = 20;
+            attackRating = 15;
             strength = 10;
             defense = 10;
             health = 10;
             magic = 50;
+            experience = 0;
         }
         else if (hero.name.Contains("Brute"))
         {
             moveSpeedMultiplier = 10;
             attackSpeed = 10;
-            strength = 60;
+            attackRating = 30;
+            strength = 65;
             defense = 40;
             health = 30;
             magic = 10;
+            experience = 0;
         }
 
         moveSpeed = 0.04f + (0.001f * moveSpeedMultiplier);
+        life = 2 * health;
+        mana = 2 * magic;
 
         isMoving = false;
         isAttacking = false;
@@ -90,7 +103,7 @@ public class Player : MonoBehaviour
         lockZmovement = false;
 
         cursor = GameObject.FindGameObjectWithTag("Cursor");
-        originalCursorColor = new Color(0.632f, 1, 1, 1); ;
+        originalCursorColor = new Color(0.632f, 1, 1, 1);
         enemyHighlightCursorColor = Color.white;
 
         uiCursor = GameObject.FindGameObjectWithTag("UI Cursor").GetComponent<RawImage>();
@@ -113,28 +126,13 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            if (isInUI == false && isAttacking == false)
+            if (isInUI == false && (isAttacking == false || cursor.GetComponent<SpriteRenderer>().color == originalCursorColor))
             {
-                //if (isEngaged == true)
-                //{
-                //    hero.transform.LookAt(enemy.transform.position);
-                //    hero.GetComponent<Animation>().Play(attack.name);
-                //    Animation animation = hero.GetComponent<Animation>();
-                //    animation[attack.name].speed = 1 + (0.01f * attackSpeed);
-                //    animation.Play(attack.name);
-                //}
-                //else
-                //{
-                    isMoving = true;
+                isMoving = true;
 
-                    moveToPosition = new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z);
+                moveToPosition = new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z);
 
-                    hero.transform.LookAt(moveToPosition);
-                //    }
-                //}
-                //else
-                //{
-
+                hero.transform.LookAt(moveToPosition);
             }
 
         }
@@ -156,8 +154,6 @@ public class Player : MonoBehaviour
 
                 animation[block.name].time = 0.25f;
                 animation[block.name].speed = 0;
-
-                var test = 5;
             }
             else if (isBlocking == true)
             {
@@ -259,9 +255,8 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Enemy" && this.gameObject.tag == "Player" && other is CapsuleCollider)
+        if (other.gameObject.tag == "Enemy" && other is CapsuleCollider)
         {
-            enemy = other.gameObject;
             hero.transform.LookAt(new Vector3(other.gameObject.transform.position.x, 0, other.gameObject.transform.position.z));
             //isEngaged = true;
         }
@@ -294,6 +289,16 @@ public class Player : MonoBehaviour
                 
                 animation[attack.name].speed = 1 + (0.01f * attackSpeed);
                 animation.Play(attack.name);
+
+                uint hitChance = (uint)Random.Range(0, 100);
+
+                if (hitChance <= 75)
+                {
+                    // TODO Give Damage when attack animation is finished
+
+                    Enemy enemy = other.GetComponent<Enemy>();
+                    enemy.Damage(ref attackRating, ref strength, false);
+                }
             }
             else
             {
@@ -326,7 +331,6 @@ public class Player : MonoBehaviour
     {
         if (other.gameObject.tag == "Enemy" && other is CapsuleCollider)
         {
-            enemy = null;
             //isEngaged = false;
             isAttacking = false;
         }
@@ -357,5 +361,10 @@ public class Player : MonoBehaviour
         FindObjectOfType<Cursor>().gameObject.transform.position = oppositeMovement;
 
         hero.transform.LookAt(FindObjectOfType<Cursor>().gameObject.transform.position);
+    }
+
+    public void AddExperience(ref uint amount)
+    {
+        experience += amount;
     }
 }

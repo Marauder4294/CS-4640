@@ -1386,11 +1386,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b1ecec55584c3e458296f67527fd88e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hero: {fileID: 1133042163742944}
+  hero: {fileID: 114449303896197302}
   idle: {fileID: 7400008, guid: 608191cf3aeaa85419bb4558fccb064b, type: 3}
   run: {fileID: 7400004, guid: 608191cf3aeaa85419bb4558fccb064b, type: 3}
   attack: {fileID: 7400020, guid: 608191cf3aeaa85419bb4558fccb064b, type: 3}
   block: {fileID: 7400010, guid: 608191cf3aeaa85419bb4558fccb064b, type: 3}
+  die1: {fileID: 7400016, guid: 608191cf3aeaa85419bb4558fccb064b, type: 3}
+  die2: {fileID: 7400018, guid: 608191cf3aeaa85419bb4558fccb064b, type: 3}
 --- !u!136 &136137920648102532
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -1403,7 +1405,7 @@ CapsuleCollider:
   m_Radius: 0.26
   m_Height: 0.4
   m_Direction: 1
-  m_Center: {x: 0, y: 0.21, z: 0.06}
+  m_Center: {x: 0, y: 0.21, z: 0}
 --- !u!137 &137160545130076518
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

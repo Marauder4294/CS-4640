@@ -1450,7 +1450,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 207ea39e747eda940a42ec6a206c4ae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemy: {fileID: 1457832196376844}
+  enemy: {fileID: 114738246160001926}
   move: {fileID: 7400000, guid: 8141a1e3f5562ba4d910d6c02d5d213c, type: 3}
   attack: {fileID: 7400000, guid: 680aa8d4593c33b45842a78661c6b71e, type: 3}
   die1: {fileID: 7400000, guid: 1edfb954a3c0d354a939593f4695236b, type: 3}
@@ -1480,7 +1480,7 @@ CapsuleCollider:
   m_Radius: 1.11
   m_Height: 1.68
   m_Direction: 1
-  m_Center: {x: 0, y: 0.92, z: 0.53}
+  m_Center: {x: 0, y: 0.92, z: 0.16}
 --- !u!137 &137031200827659540
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
