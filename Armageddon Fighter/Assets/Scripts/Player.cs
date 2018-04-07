@@ -11,9 +11,15 @@ public class Player : MonoBehaviour
     GameObject enemy;
 
     GameObject cursor;
+    Color originalCursorColor;
+    Color enemyHighlightCursorColor;
+
     RawImage uiCursor;
 
     bool isMoving;
+    bool isAttacking;
+    bool isBlocking;
+
     bool lockXmovement;
     bool lockZmovement;
     float moveSpeed;
@@ -27,6 +33,8 @@ public class Player : MonoBehaviour
     uint health;
     uint magic;
 
+    Animation animation;
+
     public AnimationClip idle;
     AnimationClip walk;
     public AnimationClip run;
@@ -36,7 +44,7 @@ public class Player : MonoBehaviour
 
     Vector3 moveToPosition;
 
-    bool isEngaged;
+    //bool isEngaged;
 
     // Use this for initialization
     void Start()
@@ -74,13 +82,20 @@ public class Player : MonoBehaviour
         moveSpeed = 0.04f + (0.001f * moveSpeedMultiplier);
 
         isMoving = false;
-        isEngaged = false;
+        isAttacking = false;
+        isBlocking = false;
+
+        //isEngaged = false;
         lockXmovement = false;
         lockZmovement = false;
 
         cursor = GameObject.FindGameObjectWithTag("Cursor");
+        originalCursorColor = new Color(0.632f, 1, 1, 1); ;
+        enemyHighlightCursorColor = Color.white;
 
         uiCursor = GameObject.FindGameObjectWithTag("UI Cursor").GetComponent<RawImage>();
+
+        animation = hero.GetComponent<Animation>();
 
         isInUI = false;
     }
@@ -98,45 +113,73 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            if (isInUI == false)
+            if (isInUI == false && isAttacking == false)
             {
-                if (isEngaged == true)
-                {
-                    hero.transform.LookAt(enemy.transform.position);
-                    hero.GetComponent<Animation>().Play(attack.name);
-                    Animation animation = hero.GetComponent<Animation>();
-                    animation[attack.name].speed = 1 + (0.01f * attackSpeed);
-                    animation.Play(attack.name);
-                }
-                else
-                {
+                //if (isEngaged == true)
+                //{
+                //    hero.transform.LookAt(enemy.transform.position);
+                //    hero.GetComponent<Animation>().Play(attack.name);
+                //    Animation animation = hero.GetComponent<Animation>();
+                //    animation[attack.name].speed = 1 + (0.01f * attackSpeed);
+                //    animation.Play(attack.name);
+                //}
+                //else
+                //{
                     isMoving = true;
 
                     moveToPosition = new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z);
 
                     hero.transform.LookAt(moveToPosition);
-                }
-            }
-            else
-            {
+                //    }
+                //}
+                //else
+                //{
 
             }
 
         }
         else if (Input.GetMouseButton(1))
         {
-            if (Regex.IsMatch(hero.name, "Slasher") == false)
+            if (hero.name.Contains("Slasher") == false)
             {
-                hero.GetComponent<Animation>().Play(block.name);
+                isBlocking = true;
+                animation.Play(block.name);
+            }
+            else if(isBlocking == false)
+            {
+                isBlocking = true;
+
+                hero.transform.LookAt(new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z));
+
+                animation.Stop();
+                animation.Play(block.name);
+
+                animation[block.name].time = 0.25f;
+                animation[block.name].speed = 0;
+
+                var test = 5;
+            }
+            else if (isBlocking == true)
+            {
+                hero.transform.LookAt(new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z));
+            }
+        }
+        else if (Input.GetMouseButton(1) == false && isBlocking == true)
+        {
+            isBlocking = false;
+
+            if (hero.name.Contains("Slasher") == false)
+            {
+                animation.Play(block.name);
             }
             else
             {
                 hero.transform.LookAt(new Vector3(cursor.transform.position.x, 0, cursor.transform.position.z));
 
-                Animation animation = hero.GetComponent<Animation>();
-                animation.Play(block.name);
+                animation[block.name].time = 0.25f;
+                animation[block.name].speed = -1;
 
-                StartCoroutine(HoldAnimation(animation, block.name));
+                animation.Play(block.name);
             }
         }
 
@@ -214,22 +257,13 @@ public class Player : MonoBehaviour
         }
     }
 
-    IEnumerator HoldAnimation(Animation animation, string animClip)
-    {
-        yield return new WaitForSeconds(0.25f);
-
-        animation[block.name].time = 0.25f;
-        animation[block.name].speed = 0;
-        animation[block.name].weight = 0;
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Enemy" && this.gameObject.tag == "Player" && other is CapsuleCollider)
         {
             enemy = other.gameObject;
             hero.transform.LookAt(new Vector3(other.gameObject.transform.position.x, 0, other.gameObject.transform.position.z));
-            isEngaged = true;
+            //isEngaged = true;
         }
         else if (other is BoxCollider)
         {
@@ -248,7 +282,25 @@ public class Player : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other is BoxCollider)
+        if (other.tag == "Enemy" && other is CapsuleCollider)
+        {
+            if (Input.GetMouseButton(0) && cursor.GetComponent<SpriteRenderer>().color == enemyHighlightCursorColor)
+            {
+                isMoving = false;
+                isAttacking = true;
+                isBlocking = false;
+
+                hero.transform.LookAt(other.transform.position);
+                
+                animation[attack.name].speed = 1 + (0.01f * attackSpeed);
+                animation.Play(attack.name);
+            }
+            else
+            {
+                isAttacking = false;
+            }
+        }
+        else if (other is BoxCollider)
         {
             Vector3 boundary = other.transform.position;
             Vector3 heroDirection = this.gameObject.transform.position;
@@ -272,10 +324,11 @@ public class Player : MonoBehaviour
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Enemy" && this.gameObject.tag == "Player" && other is CapsuleCollider)
+        if (other.gameObject.tag == "Enemy" && other is CapsuleCollider)
         {
             enemy = null;
-            isEngaged = false;
+            //isEngaged = false;
+            isAttacking = false;
         }
         else if (other is BoxCollider)
         {

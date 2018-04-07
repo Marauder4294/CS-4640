@@ -9,14 +9,11 @@ public class Cursor : MonoBehaviour {
     public GameObject cursor;
     public GameObject uiCursor;
 
-    Color originalColor;
-    Color enemyHighlightColor;
+    protected Color originalColor;
+    protected Color enemyHighlightColor;
 
     Vector3 zeroedScreenVector;
     Vector3 screenMaxSizeVector;
-
-    //Image[] uiImages;
-    //Text[] uiText;
 
     float uiBarHeight;
 

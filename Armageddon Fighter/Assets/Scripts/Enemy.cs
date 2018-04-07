@@ -34,8 +34,14 @@ public class Enemy : MonoBehaviour
         {
             enemy.transform.LookAt(new Vector3(hero.transform.position.x, 0, hero.transform.position.z));
             moveToPosition = new Vector3(hero.transform.position.x, 0, hero.transform.position.z);
-            isMoving = true;
         }
+
+        //if (moveTriggered == true)
+        //{
+        //    enemy.transform.LookAt(new Vector3(hero.transform.position.x, 0, hero.transform.position.z));
+        //    moveToPosition = new Vector3(hero.transform.position.x, 0, hero.transform.position.z);
+        //    isMoving = true;
+        //}
 
         if (isMoving == true)
         {
@@ -85,9 +91,14 @@ public class Enemy : MonoBehaviour
                 }
             }
 
-            if (didMove == false)
+            //if (didMove == false)
+            //{
+            //    enemy.GetComponent<Animation>().Play(attack.name);
+            //}
+
+            if (didMove == true)
             {
-                enemy.GetComponent<Animation>().Play(attack.name);
+                enemy.GetComponent<Animation>().Play(move.name);
             }
 
             enemy.transform.position = enemyPosition;
@@ -96,10 +107,34 @@ public class Enemy : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Player" && this.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Player" && moveTriggered == false)
         {
-            enemy.GetComponent<Animation>().Play(move.name);
+            enemy.GetComponent<SphereCollider>().enabled = false;
+            //enemy.GetComponent<Animation>().Play(move.name);
             moveTriggered = true;
+            isMoving = true;
+        }
+        else if (other.gameObject.tag == "Player" && moveTriggered == true)
+        {
+            isMoving = false;
+            enemy.GetComponent<Animation>().Play(attack.name);
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Player" && moveTriggered == true)
+        {
+            isMoving = false;
+            enemy.GetComponent<Animation>().Play(attack.name);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player" && moveTriggered == true)
+        {
+            isMoving = true;
         }
     }
 }
