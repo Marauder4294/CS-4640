@@ -14,16 +14,18 @@ public class Player : MonoBehaviour
     Color enemyHighlightCursorColor;
 
     RawImage uiCursor;
+    Image healthGlobe;
+    Image ManaGlobe;
 
     bool isMoving;
     bool isAttacking;
     bool isBlocking;
-
-    bool lockXmovement;
-    bool lockZmovement;
+    bool attackAnimating;
+    //bool isEngaged;
 
     float moveSpeed;
-    uint life;
+    uint fullLife;
+    int life;
     uint mana;
     uint experience;
 
@@ -48,8 +50,6 @@ public class Player : MonoBehaviour
     public AnimationClip die2;
 
     Vector3 moveToPosition;
-
-    //bool isEngaged;
 
     // Use this for initialization
     void Start()
@@ -91,16 +91,16 @@ public class Player : MonoBehaviour
         }
 
         moveSpeed = 0.04f + (0.001f * moveSpeedMultiplier);
-        life = 2 * health;
+        fullLife = 2 * health;
+        life = 2 * (int)health;
         mana = 2 * magic;
 
         isMoving = false;
         isAttacking = false;
         isBlocking = false;
+        attackAnimating = false;
 
         //isEngaged = false;
-        lockXmovement = false;
-        lockZmovement = false;
 
         cursor = GameObject.FindGameObjectWithTag("Cursor");
         originalCursorColor = new Color(0.632f, 1, 1, 1);
@@ -188,48 +188,42 @@ public class Player : MonoBehaviour
 
             if (Mathf.Abs(heroPosition.x - cursorPosition.x) > 0.1)
             {
-                if (lockXmovement == false)
+                didMove = true;
+
+                float test = cursorPosition.x - heroPosition.x;
+
+                if (test > 0)
                 {
-                    didMove = true;
+                    heroPosition.x += moveSpeed;
+                }
+                else if (test < 0)
+                {
+                    heroPosition.x -= moveSpeed;
+                }
 
-                    float test = cursorPosition.x - heroPosition.x;
-
-                    if (test > 0)
-                    {
-                        heroPosition.x += moveSpeed;
-                    }
-                    else if (test < 0)
-                    {
-                        heroPosition.x -= moveSpeed;
-                    }
-
-                    if (Mathf.Abs(test) < moveSpeed)
-                    {
-                        heroPosition.x = cursorPosition.x;
-                    }
+                if (Mathf.Abs(test) < moveSpeed)
+                {
+                    heroPosition.x = cursorPosition.x;
                 }
             }
             if (Mathf.Abs(heroPosition.z - cursorPosition.z) > 0.1)
             {
-                if (lockZmovement == false)
+                didMove = true;
+
+                float test = cursorPosition.z - heroPosition.z;
+
+                if (test > 0)
                 {
-                    didMove = true;
+                    heroPosition.z += moveSpeed;
+                }
+                else if (test < 0)
+                {
+                    heroPosition.z -= moveSpeed;
+                }
 
-                    float test = cursorPosition.z - heroPosition.z;
-
-                    if (test > 0)
-                    {
-                        heroPosition.z += moveSpeed;
-                    }
-                    else if (test < 0)
-                    {
-                        heroPosition.z -= moveSpeed;
-                    }
-
-                    if (Mathf.Abs(test) < moveSpeed)
-                    {
-                        heroPosition.z = cursorPosition.z;
-                    }
+                if (Mathf.Abs(test) < moveSpeed)
+                {
+                    heroPosition.z = cursorPosition.z;
                 }
             }
 
@@ -255,29 +249,27 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other is SphereCollider == false)
+        {
+            CollisionLock(other);
+        }
+
         if (other.gameObject.tag == "Enemy" && other is CapsuleCollider)
         {
+            hero.GetComponent<Rigidbody>().velocity = Vector3.zero;
             hero.transform.LookAt(new Vector3(other.gameObject.transform.position.x, 0, other.gameObject.transform.position.z));
             //isEngaged = true;
-        }
-        else if (other is BoxCollider)
-        {
-            Vector3 boundary = other.transform.position;
-            Vector3 heroDirection = this.gameObject.transform.position;
-            if (Mathf.Abs(heroDirection.x - boundary.x) <= 0.2)
-            {
-                collisionXlock(this.gameObject, other.gameObject);
-            }
-            if (Mathf.Abs(heroDirection.z - boundary.z) <= 0.2)
-            {
-                collisionZlock(this.gameObject, other.gameObject);
-            }
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Enemy" && other is CapsuleCollider)
+        if (other is SphereCollider == false)
+        {
+            CollisionLock(other);
+        }
+
+        if (other.tag == "Enemy" && other is CapsuleCollider && attackAnimating == false)
         {
             if (Input.GetMouseButton(0) && cursor.GetComponent<SpriteRenderer>().color == enemyHighlightCursorColor)
             {
@@ -288,42 +280,11 @@ public class Player : MonoBehaviour
                 hero.transform.LookAt(other.transform.position);
                 
                 animation[attack.name].speed = 1 + (0.01f * attackSpeed);
-                animation.Play(attack.name);
-
-                uint hitChance = (uint)Random.Range(0, 100);
-
-                if (hitChance <= 75)
-                {
-                    // TODO Give Damage when attack animation is finished
-
-                    Enemy enemy = other.GetComponent<Enemy>();
-                    enemy.Damage(ref attackRating, ref strength, false);
-                }
+                StartCoroutine(MeleeAttack(other.gameObject));
             }
             else
             {
                 isAttacking = false;
-            }
-        }
-        else if (other is BoxCollider)
-        {
-            Vector3 boundary = other.transform.position;
-            Vector3 heroDirection = this.gameObject.transform.position;
-            if (Mathf.Abs(heroDirection.x - boundary.x) <= 0.2)
-            {
-                collisionXlock(this.gameObject, other.gameObject);
-            }
-            else
-            {
-                lockXmovement = false;
-            }
-            if (Mathf.Abs(heroDirection.z - boundary.z) <= 0.2)
-            {
-                collisionZlock(this.gameObject, other.gameObject);
-            }
-            else
-            {
-                lockZmovement = false;
             }
         }
     }
@@ -334,33 +295,81 @@ public class Player : MonoBehaviour
             //isEngaged = false;
             isAttacking = false;
         }
-        else if (other is BoxCollider)
+    }
+
+    private void CollisionLock(Collider other)
+    {
+        /*Got this code from tow sources. This was really hard for med to figure out, and these pieces work like a charm :)*/
+        /*Sources:
+         * https://answers.unity.com/questions/1010169/how-to-know-if-an-object-is-looking-at-an-other.html  for object looking at another
+         * https://forum.unity.com/threads/stopping-movement-in-trigger-events.79638/  for not allowing an object to enter another */
+
+        Vector3 dirFromAtoB = (other.transform.position - hero.transform.position).normalized;
+        float dotProd = Vector3.Dot(dirFromAtoB, hero.transform.forward);
+
+        if (dotProd > 0.3)
         {
-            lockXmovement = false;
-            lockZmovement = false;
+            Vector3 newPos = transform.position;
+            newPos = other.ClosestPointOnBounds(newPos);
+
+            Vector3 collisionDir = transform.position - newPos;
+            collisionDir.Normalize();
+            collisionDir *= 1.1f;
+            collisionDir.x *= other.bounds.extents.x;
+            collisionDir.z *= other.bounds.extents.z;
+
+            hero.transform.position = new Vector3(newPos.x + collisionDir.x, 0.01f, newPos.z + collisionDir.z);
         }
     }
 
-    private void collisionXlock(GameObject player, GameObject other)
+    private IEnumerator MeleeAttack(GameObject other)
     {
-        lockXmovement = true;
-        lockZmovement = false;
-        Vector3 oppositeMovement = new Vector3(player.transform.position.x, 0, (player.transform.position.z - other.transform.position.z) * -1);
+        attackAnimating = true;
+        animation.Play(attack.name);
 
-        FindObjectOfType<Cursor>().gameObject.transform.position = oppositeMovement;
+        yield return new WaitForSeconds((animation[attack.name].length * (animation[attack.name].length / (animation[attack.name].speed * animation[attack.name].length))) / 2);
 
-        hero.transform.LookAt(FindObjectOfType<Cursor>().gameObject.transform.position);
+        uint hitChance = (uint)Random.Range(0, 100);
+        animation[attack.name].speed = 1;
+        attackAnimating = false;
+
+        if (hitChance <= 75)
+        {
+            Enemy enemy = other.GetComponent<Enemy>();
+            enemy.Damage(ref attackRating, ref strength, false);
+        }
     }
 
-    private void collisionZlock(GameObject player, GameObject other)
+    public void Damage(ref uint enemyRating, ref uint enemyStrength, bool attackIsMagic)
     {
-        lockZmovement = true;
-        lockXmovement = false;
-        Vector3 oppositeMovement = new Vector3((player.transform.position.x - other.transform.position.x) * -1, 0, player.transform.position.z);
+        //if (attackIsMagic == false)
+        //{
+        //    uint damage = enemyStrength;
 
-        FindObjectOfType<Cursor>().gameObject.transform.position = oppositeMovement;
+        //    animation.Stop();
 
-        hero.transform.LookAt(FindObjectOfType<Cursor>().gameObject.transform.position);
+        //    if (damage < life && damage < fullLife)
+        //    {
+        //        life -= (int)damage;
+        //        healthGlobe.GetComponent<Sprite>().sizeDelta = new Vector2(healthBar.rectTransform.rect.width, originalHealthGlobeHeight * ((float)life / (float)fullLife));
+        //    }
+        //    else
+        //    {
+        //        life = 0;
+        //        healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(0, healthBar.rectTransform.rect.height);
+        //    }
+        //}
+        //else
+        //{
+
+        //}
+
+        //if (life <= 0)
+        //{
+        //    enemy.GetComponent<CapsuleCollider>().enabled = false;
+        //    animation.Stop();
+        //    isAlive = false;
+        //}
     }
 
     public void AddExperience(ref uint amount)

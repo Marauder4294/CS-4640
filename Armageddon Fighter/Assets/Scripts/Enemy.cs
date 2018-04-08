@@ -105,7 +105,10 @@ public class Enemy : MonoBehaviour
 
         moveSpeed = 0.02f + (0.001f * moveSpeedMultiplier);
         life = (int)fullLife;
-        originalHealthBarWidth = healthBar.rectTransform.rect.width;
+        //originalHealthBarWidth = healthBar.rectTransform.rect.width;
+
+        healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(394.96f, 9.7f);
+        originalHealthBarWidth = 394.96f;
     }
 
     void FixedUpdate()
@@ -207,6 +210,10 @@ public class Enemy : MonoBehaviour
             isMoving = false;
             animation.Play(attack.name);
         }
+        //else if (other is BoxCollider)
+        //{
+        //    CollisionLock(other);
+        //}
     }
 
     private void OnTriggerStay(Collider other)
@@ -217,13 +224,46 @@ public class Enemy : MonoBehaviour
             animation[attack.name].speed = 1 + (0.01f * attackSpeed);
             animation.Play(attack.name);
         }
+        //else if (other is BoxCollider)
+        //{
+        //    CollisionLock(other);
+        //}
     }
 
     private void OnTriggerExit(Collider other)
     {
+        StopCoroutine(CheckIfStuck(enemy.transform.position, other));
+
         if (other.gameObject.tag == "Player" && moveTriggered == true)
         {
             isMoving = true;
+        }
+    }
+
+    private void CollisionLock(Collider other)
+    {
+        /*Got this code from tow sources. This was really hard for med to figure out, and these pieces work like a charm :)*/
+        /*Sources:
+         * https://answers.unity.com/questions/1010169/how-to-know-if-an-object-is-looking-at-an-other.html  for object looking at another
+         * https://forum.unity.com/threads/stopping-movement-in-trigger-events.79638/  for not allowing an object to enter another */
+
+        Vector3 dirFromAtoB = (other.transform.position - enemy.transform.position).normalized;
+        float dotProd = Vector3.Dot(dirFromAtoB, enemy.transform.forward);
+
+        if (dotProd < 0.3)
+        {
+            Vector3 newPos = transform.position;
+            newPos = other.ClosestPointOnBounds(newPos);
+
+            Vector3 collisionDir = transform.position - newPos;
+            collisionDir.Normalize();
+            collisionDir *= 1.1f;
+            collisionDir.x *= other.bounds.extents.x;
+            collisionDir.z *= other.bounds.extents.z;
+
+            enemy.transform.position = new Vector3(newPos.x + collisionDir.x, 0.01f, newPos.z + collisionDir.z);
+
+            StartCoroutine(CheckIfStuck(enemy.transform.position, other));
         }
     }
 
@@ -232,17 +272,18 @@ public class Enemy : MonoBehaviour
         if (attackIsMagic == false)
         {
             uint damage = heroStrength - (defense + 5);
-
-            life -= (int)damage;
+            
             animation.Stop();
 
             if (damage < life && damage < fullLife)
             {
-                healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(healthBar.rectTransform.rect.width * (fullLife / life), healthBar.rectTransform.rect.height);
+                life -= (int)damage;
+                healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(originalHealthBarWidth * ((float)life / (float)fullLife), healthBar.rectTransform.rect.height);
             }
             else
             {
-                healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(healthBar.rectTransform.rect.width * 0, healthBar.rectTransform.rect.height);
+                life = 0;
+                healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(0, healthBar.rectTransform.rect.height);
             }
         }
         else
@@ -262,5 +303,47 @@ public class Enemy : MonoBehaviour
     {
         yield return new WaitForSeconds(5);
         Destroy(enemy.gameObject);
+    }
+
+    private IEnumerator CheckIfStuck(Vector3 previousPosition, Collider other)
+    {
+        yield return new WaitForSeconds(0.25f);
+
+        if (enemy.transform.position == previousPosition && isMoving == true)
+        {
+            Vector3 differingPositions = previousPosition - hero.transform.position;
+            Bounds colliderBounds = other.bounds;
+
+            float maxXposition = Mathf.Abs(colliderBounds.max.x - previousPosition.x);
+            float minXposition = Mathf.Abs(colliderBounds.min.x - previousPosition.x);
+            float maxZposition = Mathf.Abs(colliderBounds.max.z - previousPosition.z);
+            float minZposition = Mathf.Abs(colliderBounds.min.z - previousPosition.z);
+
+            if (Mathf.Abs(differingPositions.x) > 0.1 )
+            {
+                if (maxZposition <= minZposition)
+                {
+                    previousPosition.z += maxZposition + 0.01f;
+                }
+                else
+                {
+                    previousPosition.z += minZposition + 0.01f;
+                }
+            }
+
+            if (Mathf.Abs(differingPositions.z) > 0.1)
+            {
+                if (maxXposition <= minXposition)
+                {
+                    previousPosition.x += maxXposition + 0.01f;
+                }
+                else
+                {
+                    previousPosition.x += minXposition + 0.01f;
+                }
+            }
+
+            enemy.transform.position = previousPosition;
+        }
     }
 }

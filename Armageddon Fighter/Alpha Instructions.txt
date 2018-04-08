@@ -1,0 +1,16 @@
+Welcome to Armageddon Fighter!
+
+Right now, this is definitely an alpha build! You can't die and the enemies can. Enemies can walk through
+objects. Sometimes, the hero gets caught in colliders. There is also only one level, one hero, and one type
+of enemy. That will change soon as I spent an extreme amount of time getting the basics down with point-and-
+click controls (Diablo style RPGs are extremely time consuming to make). There are going to be at least 3
+different levels, 3 heroes, four types of enemies, and one boss. Here is what you need to know.
+
+To move: point and left-click
+To melee attack: point and left-click on the enemy and the hero will attack when close enough
+To block: right-click
+To end blocking: release right-click
+
+To exit game: Alt + F4
+
+
