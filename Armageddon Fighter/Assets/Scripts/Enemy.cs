@@ -43,6 +43,7 @@ public class Enemy : MonoBehaviour
     Vector3 moveToPosition;
     float moveSpeed;
     bool isMoving;
+    bool attackAnimating;
     bool isAlive;
     bool isDead;
 
@@ -107,8 +108,12 @@ public class Enemy : MonoBehaviour
         life = (int)fullLife;
         //originalHealthBarWidth = healthBar.rectTransform.rect.width;
 
+        attackAnimating = false;
+
         healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(394.96f, 9.7f);
         originalHealthBarWidth = 394.96f;
+
+        enemy.name = System.Text.RegularExpressions.Regex.Replace(enemy.name, " " + System.Text.RegularExpressions.Regex.Escape("(") + ".*$", "");
     }
 
     void FixedUpdate()
@@ -221,8 +226,12 @@ public class Enemy : MonoBehaviour
         if (other.gameObject.tag == "Player" && moveTriggered == true)
         {
             isMoving = false;
+
             animation[attack.name].speed = 1 + (0.01f * attackSpeed);
-            animation.Play(attack.name);
+            if (attackAnimating == false)
+            {
+                StartCoroutine(MeleeAttack(other.gameObject));
+            }
         }
         //else if (other is BoxCollider)
         //{
@@ -238,6 +247,25 @@ public class Enemy : MonoBehaviour
         {
             isMoving = true;
         }
+    }
+
+    private IEnumerator MeleeAttack(GameObject other)
+    {
+        attackAnimating = true;
+        animation.Play(attack.name);
+
+        yield return new WaitForSeconds((animation[attack.name].length * (animation[attack.name].length / (animation[attack.name].speed * animation[attack.name].length))) / 2);
+
+        uint hitChance = (uint)Random.Range(1, 100);
+        animation[attack.name].speed = 1;
+
+        if (hitChance <= 50)
+        {
+            Player hero = other.GetComponent<Player>();
+            hero.Damage(ref attackRating, ref strength, false);
+        }
+
+        attackAnimating = false;
     }
 
     private void CollisionLock(Collider other)
@@ -269,32 +297,36 @@ public class Enemy : MonoBehaviour
 
     public void Damage(ref uint heroRating, ref uint heroStrength, bool attackIsMagic)
     {
+        uint damage = 0;
+
         if (attackIsMagic == false)
         {
-            uint damage = heroStrength - (defense + 5);
-            
-            animation.Stop();
+            damage = heroStrength - (defense + 5);
 
-            if (damage < life && damage < fullLife)
-            {
-                life -= (int)damage;
-                healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(originalHealthBarWidth * ((float)life / (float)fullLife), healthBar.rectTransform.rect.height);
-            }
-            else
-            {
-                life = 0;
-                healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(0, healthBar.rectTransform.rect.height);
-            }
+            
         }
         else
         {
+            damage = heroStrength;
+        }
 
+        attackAnimating = false;
+        animation.Stop();
+
+        if (damage < life && damage < fullLife)
+        {
+            life -= (int)damage;
+            healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(originalHealthBarWidth * ((float)life / (float)fullLife), healthBar.rectTransform.rect.height);
+        }
+        else
+        {
+            life = 0;
+            healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(0, healthBar.rectTransform.rect.height);
         }
 
         if (life <= 0)
         {
             enemy.GetComponent<CapsuleCollider>().enabled = false;
-            animation.Stop();
             isAlive = false;
         }
     }
@@ -345,5 +377,18 @@ public class Enemy : MonoBehaviour
 
             enemy.transform.position = previousPosition;
         }
+    }
+
+    public void showUI()
+    {
+        nameBar.enabled = true;
+
+        healthBar.enabled = true;
+
+        nameText.enabled = true;
+
+        healthBar.GetComponent<RectTransform>().sizeDelta = new Vector2(originalHealthBarWidth * ((float)life / (float)fullLife), healthBar.rectTransform.rect.height);
+
+        nameText.text = enemy.name;
     }
 }

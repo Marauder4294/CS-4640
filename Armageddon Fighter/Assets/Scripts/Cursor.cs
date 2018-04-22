@@ -26,6 +26,14 @@ public class Cursor : MonoBehaviour {
     Image enemyHealthBar;
     Text enemyNameText;
 
+    GameObject minXBoundary;
+    GameObject maxXBoundary;
+
+    GameObject minZBoundary;
+    GameObject maxZBoundary;
+
+    GameObject minYBoundary;
+
     // Use this for initialization
     void Start () {
 
@@ -136,13 +144,9 @@ public class Cursor : MonoBehaviour {
         if (other.gameObject.tag == "Enemy" && other is CapsuleCollider)
         {
             cursor.GetComponent<SpriteRenderer>().color = enemyHighlightColor;
+            Enemy enemy = other.gameObject.GetComponent<Enemy>();
 
-            enemyNameBar.enabled = true;
-
-            enemyHealthBar.enabled = true;
-
-            enemyNameText.enabled = true;
-            enemyNameText.text = other.gameObject.name;
+            enemy.showUI();
         }
         else if (other.gameObject.tag == "Pickup")
         {
