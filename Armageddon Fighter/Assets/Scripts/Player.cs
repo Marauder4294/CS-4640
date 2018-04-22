@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using UnityEngine.SceneManagement;
 //using System.IO;
 using UnityEngine.UI;
 
@@ -34,7 +35,14 @@ public class Player : MonoBehaviour
     int life;
     uint fullMana;
     int mana;
+
+    float originalExperienceBarWidth;
+
+    uint level;
     uint experience;
+    uint barrierExperience;
+    uint zeroedExperience;
+    uint levelExperience;
 
     bool isInUI;
 
@@ -55,6 +63,14 @@ public class Player : MonoBehaviour
     public AnimationClip block;
     public AnimationClip die1;
     public AnimationClip die2;
+
+    AudioSource audioSource;
+
+    public AudioClip swing;
+    public AudioClip yelp;
+    public AudioClip blockSound;
+    public AudioClip dieSound;
+    public AudioClip levelUp;
 
     Vector3 moveToPosition;
 
@@ -104,6 +120,12 @@ public class Player : MonoBehaviour
             magic = 10;
             experience = 0;
         }
+
+        levelExperience = 50;
+        zeroedExperience = 0;
+        barrierExperience = levelExperience;
+
+        level = 1;
 
         GameObject[] boundaries = GameObject.FindGameObjectsWithTag("Boundary");
         Image[] uiImages = FindObjectsOfType<Image>();
@@ -188,6 +210,10 @@ public class Player : MonoBehaviour
         uiCursor = GameObject.FindGameObjectWithTag("UI Cursor").GetComponent<RawImage>();
 
         animation = hero.GetComponent<Animation>();
+        audioSource = hero.GetComponent<AudioSource>();
+
+        experienceBar.GetComponent<RectTransform>().sizeDelta = new Vector2(0, experienceBar.rectTransform.rect.height);
+        originalExperienceBarWidth = 222.2f;
 
         isInUI = false;
     }
@@ -271,7 +297,8 @@ public class Player : MonoBehaviour
                     }
                 }
             }
-            else if (Input.GetKey(KeyCode.Q))
+
+            if (Input.GetKeyDown(KeyCode.Q))
             {
                 int amount = 0;
                 int.TryParse(beltSlot1.text, out amount);
@@ -284,7 +311,7 @@ public class Player : MonoBehaviour
                     beltSlot1.text = (amount - 1).ToString();
                 }
             }
-            else if (Input.GetKey(KeyCode.W))
+            else if (Input.GetKeyDown(KeyCode.W))
             {
                 int amount = 0;
                 int.TryParse(beltSlot2.text, out amount);
@@ -297,7 +324,7 @@ public class Player : MonoBehaviour
                     beltSlot2.text = (amount - 1).ToString();
                 }
             }
-            else if (Input.GetKey(KeyCode.E))
+            else if (Input.GetKeyDown(KeyCode.E))
             {
                 int amount = 0;
                 int.TryParse(beltSlot3.text, out amount);
@@ -311,6 +338,15 @@ public class Player : MonoBehaviour
 
                     beltSlot3.text = (amount - 1).ToString();
                 }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
+            else if (Input.GetKeyDown(KeyCode.Return))
+            {
+                SceneManager.LoadScene("Level 1");
             }
 
             if (isMoving == true)
@@ -388,6 +424,7 @@ public class Player : MonoBehaviour
             animation.Stop();
 
             animation.Play(die1.name);
+            audioSource.PlayOneShot(dieSound);
 
             animation[die1.name].time = animation[die1.name].length;
             animation[die1.name].speed = 0;
@@ -428,6 +465,8 @@ public class Player : MonoBehaviour
                 hero.transform.LookAt(other.transform.position);
                 
                 animation[attack.name].speed = 1 + (0.01f * attackSpeed);
+                audioSource.PlayOneShot(swing);
+
                 if (attackAnimating == false)
                 {
                     StartCoroutine(MeleeAttack(other.gameObject));
@@ -482,13 +521,14 @@ public class Player : MonoBehaviour
 
         uint hitChance = (uint)Random.Range(1, 100);
         animation[attack.name].speed = 1;
-        attackAnimating = false;
 
-        if (hitChance <= 75)
+        if (hitChance <= 75 && attackAnimating == true)
         {
             Enemy enemy = other.GetComponent<Enemy>();
             enemy.Damage(ref attackRating, ref strength, false);
         }
+
+        attackAnimating = false;
     }
     private IEnumerator MagicAttack(int cost)
     {
@@ -510,7 +550,18 @@ public class Player : MonoBehaviour
 
     public void Damage(ref uint enemyRating, ref uint enemyStrength, bool attackIsMagic)
     {
-        uint damage = enemyStrength;
+        uint damage = 0;
+
+        if (isBlocking == false)
+        {
+            damage = enemyStrength;
+            audioSource.PlayOneShot(yelp);
+        }
+        else
+        {
+            damage = enemyStrength / 2;
+            audioSource.PlayOneShot(blockSound);
+        }
 
         if (damage < life && damage < fullLife)
         {
@@ -544,5 +595,37 @@ public class Player : MonoBehaviour
     public void AddExperience(ref uint amount)
     {
         experience += amount;
+        zeroedExperience += amount;
+
+        if (zeroedExperience < barrierExperience)
+        {
+            experienceBar.GetComponent<RectTransform>().sizeDelta = new Vector2(originalExperienceBarWidth * ((float)zeroedExperience / (float)barrierExperience), experienceBar.rectTransform.rect.height);
+        }
+        else
+        {
+            GameObject.Find("Canvas").GetComponent<AudioSource>().PlayOneShot(levelUp);
+
+            moveSpeedMultiplier += 1;
+            attackSpeed += 1;
+            attackRating += 5;
+            strength += 3;
+            defense += 2;
+            health += 4;
+            magic += 1;
+
+            fullLife = 2 * health;
+            fullMana = 2 * magic;
+
+            life = (int)fullLife;
+            mana = (int)fullMana;
+
+            levelExperience *= 2;
+            zeroedExperience = 0;
+            barrierExperience = levelExperience - experience;
+
+            healthGlobe.fillAmount = 1;
+            manaGlobe.fillAmount = 1;
+            experienceBar.GetComponent<RectTransform>().sizeDelta = new Vector2(originalExperienceBarWidth * ((float)zeroedExperience / (float)barrierExperience), experienceBar.rectTransform.rect.height);
+        }
     }
 }

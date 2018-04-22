@@ -26,6 +26,12 @@ public class Enemy : MonoBehaviour
     public AnimationClip die2;
     public AnimationClip die3;
 
+    AudioSource audioSource;
+
+    public AudioClip swing;
+    public AudioClip yelp;
+    public AudioClip dieSound;
+
     uint moveSpeedMultiplier;
     uint attackSpeed;
     uint attackRating;
@@ -62,51 +68,81 @@ public class Enemy : MonoBehaviour
 
         hero = FindObjectOfType<Player>();
         animation = enemy.GetComponent<Animation>();
+        audioSource = enemy.GetComponent<AudioSource>();
 
         Image[] uiImages = FindObjectsOfType<Image>();
         Text[] uiText = FindObjectsOfType<Text>();
 
-        if (enemy.name.Contains("Zombie"))
+        if (enemy.name.Contains("Master Zombie"))
         {
-            if (SceneManager.GetActiveScene().name == "Level 1")
+            moveSpeedMultiplier = 20;
+            attackSpeed = 5;
+            attackRating = 20;
+            strength = 35;
+            defense = 30;
+            health = 140;
+            magic = 0;
+
+            experience = (uint)((moveSpeedMultiplier * 0.25) + (attackSpeed * 0.5) + (attackRating + 0.1) + strength + (defense * 0.2) + (health * 0.35));
+
+            for (int i = 0; i < uiImages.Length; i++)
             {
-                moveSpeedMultiplier = (uint)Random.Range(0, 1);
-                attackSpeed = (uint)Random.Range(0, 1);
-                attackRating = (uint)Random.Range(0, 5);
-                strength = (uint)Random.Range(0, 5);
-                defense = (uint)Random.Range(0, 10);
-                health = (uint)Random.Range(10, 30);
-                magic = 0;
-
-                experience = (uint)((moveSpeedMultiplier * 0.25) + (attackSpeed * 0.5) + (attackRating + 0.1) + strength + (defense * 0.2) + (health * 0.35));
-
-                for (int i = 0; i < uiImages.Length; i++)
+                if (uiImages[i].name == "EnemyNameBar")
                 {
-                    if (uiImages[i].name == "EnemyNameBar")
-                    {
-                        nameBar = uiImages[i];
-                    }
-                    else if (uiImages[i].name == "EnemyHealthBar")
-                    {
-                        healthBar = uiImages[i];
-                    }
+                    nameBar = uiImages[i];
                 }
-                for (int i = 0; i < uiText.Length; i++)
+                else if (uiImages[i].name == "EnemyHealthBar")
                 {
-                    if (uiText[i].name == "EnemyNameText")
-                    {
-                        nameText = uiText[i];
-                        break;
-                    }
+                    healthBar = uiImages[i];
                 }
-
-                fullLife = health;
             }
+            for (int i = 0; i < uiText.Length; i++)
+            {
+                if (uiText[i].name == "EnemyNameText")
+                {
+                    nameText = uiText[i];
+                    break;
+                }
+            }
+
+        }
+        else if (enemy.name.Contains("Zombie"))
+        {
+            moveSpeedMultiplier = (uint)Random.Range(0, 1);
+            attackSpeed = (uint)Random.Range(0, 1);
+            attackRating = (uint)Random.Range(0, 5);
+            strength = (uint)Random.Range(0, 5);
+            defense = (uint)Random.Range(0, 10);
+            health = (uint)Random.Range(10, 30);
+            magic = 0;
+
+            experience = (uint)((moveSpeedMultiplier * 0.25) + (attackSpeed * 0.5) + (attackRating + 0.1) + strength + (defense * 0.2) + (health * 0.35));
+
+            for (int i = 0; i < uiImages.Length; i++)
+            {
+                if (uiImages[i].name == "EnemyNameBar")
+                {
+                    nameBar = uiImages[i];
+                }
+                else if (uiImages[i].name == "EnemyHealthBar")
+                {
+                    healthBar = uiImages[i];
+                }
+            }
+            for (int i = 0; i < uiText.Length; i++)
+            {
+                if (uiText[i].name == "EnemyNameText")
+                {
+                    nameText = uiText[i];
+                    break;
+                }
+            }
+
         }
 
+        fullLife = health;
         moveSpeed = 0.02f + (0.001f * moveSpeedMultiplier);
         life = (int)fullLife;
-        //originalHealthBarWidth = healthBar.rectTransform.rect.width;
 
         attackAnimating = false;
 
@@ -187,6 +223,7 @@ public class Enemy : MonoBehaviour
             isDead = true;
 
             animation.Play(die1.name);
+            audioSource.PlayOneShot(dieSound);
             hero.AddExperience(ref experience);
             cursor.GetComponent<SpriteRenderer>().color = originalCursorColor;
 
@@ -213,7 +250,12 @@ public class Enemy : MonoBehaviour
         else if (other.gameObject.tag == "Player" && moveTriggered == true)
         {
             isMoving = false;
-            animation.Play(attack.name);
+
+            animation[attack.name].speed = 1 + (0.01f * attackSpeed);
+            if (attackAnimating == false)
+            {
+                StartCoroutine(MeleeAttack(other.gameObject));
+            }
         }
         //else if (other is BoxCollider)
         //{
@@ -253,13 +295,14 @@ public class Enemy : MonoBehaviour
     {
         attackAnimating = true;
         animation.Play(attack.name);
+        audioSource.PlayOneShot(swing);
 
         yield return new WaitForSeconds((animation[attack.name].length * (animation[attack.name].length / (animation[attack.name].speed * animation[attack.name].length))) / 2);
 
         uint hitChance = (uint)Random.Range(1, 100);
         animation[attack.name].speed = 1;
 
-        if (hitChance <= 50)
+        if (hitChance <= 50 && attackAnimating == true)
         {
             Player hero = other.GetComponent<Player>();
             hero.Damage(ref attackRating, ref strength, false);
@@ -302,8 +345,6 @@ public class Enemy : MonoBehaviour
         if (attackIsMagic == false)
         {
             damage = heroStrength - (defense + 5);
-
-            
         }
         else
         {
@@ -312,6 +353,7 @@ public class Enemy : MonoBehaviour
 
         attackAnimating = false;
         animation.Stop();
+        audioSource.PlayOneShot(yelp);
 
         if (damage < life && damage < fullLife)
         {
