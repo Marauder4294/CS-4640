@@ -1,0 +1,42 @@
+Armageddon Fighter beta instructions
+
+Reference credits outside Unity:
+
+- Level song from Sega Genesis game Gunstar Heroes
+- Zombie hit and death sounds from Sega Genesis games Golden Axe II and Castlevania: Bloodlines
+- Hero hit and death sounds from Sega Genesis games Golden Axe II and Mortal Kombat
+- Swing sound from PC Game Diablo II
+- Magic Fireball sounds from Sega Genesis game Mortal Kombat
+- Level up sound from Sega CD game Final Fight
+
+- All assets and animations are credited to the Unity Asset Store
+
+Controls for Armageddon Fighter:
+
+- Left click to move/melee attack
+- Right click to block
+- 1 or ! key to use fireball (will go in the direction that the cursor is at)
+- Q key to use health potion (will give full health)
+- W key to use mana potion (will give full mana)
+- E key to use rejuvination potion (will give full health and mana)
+- Enter/Return key to restart the stage at level 1
+- Escape key to end program
+
+Mechanics:
+
+- Defeating enemies nets experience for the player. When the bar fills, the player levels up and the bar resets.
+  levelling up adds pre-determined points to stats and refills health and mana. There is an algorithm that
+  decides the amount of experience each zpmbie can give (based on the random attributes of the enemy). The amount
+  experience required to level up doubles with each level.
+- The health and mana globes reflect the percentage of health/mana the player currently has relative to their
+  maximum amount of health/mana. There is also a health bar for the enemies that reflect their life points.
+- There is one spell (Fireball) to use. This projectile will be active until it makes contact with an object
+
+Ending Remarks:
+
+	This was a rewarding project! I have learned a lot and gained a greater understanding of the amount of
+work that is required to make games. I unfortunately had to cut off this project at 36 hours, but most of that
+was just getting interactions and the UI correct. Armageddon Fighter has great potential. If given the
+opportunity in CS 4650, I would change the controls to a controller, because I feel that this game would be
+much more fun with the ease of moving the player around and not having to reach in different locations on the 
+keyboard.
